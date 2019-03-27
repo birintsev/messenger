@@ -10,7 +10,7 @@ import server.client.ClientListener;
 import server.processing.LoggersProcessing;
 import server.processing.PropertiesProcessing;
 import server.room.Room;
-import server.room.RoomProcessing;
+import server.processing.RoomProcessing;
 
 import java.io.*;
 import java.net.ServerSocket;

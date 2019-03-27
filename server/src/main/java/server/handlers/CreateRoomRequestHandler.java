@@ -5,7 +5,7 @@ import common.entities.message.MessageStatus;
 import org.jetbrains.annotations.NotNull;
 import server.client.ClientListener;
 import server.room.Room;
-import server.room.RoomProcessing;
+import server.processing.RoomProcessing;
 
 import java.util.InvalidPropertiesFormatException;
 

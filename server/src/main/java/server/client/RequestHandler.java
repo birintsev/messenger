@@ -5,22 +5,18 @@ import common.entities.message.MessageStatus;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import server.exceptions.ClientNotFoundException;
 import server.exceptions.RoomNotFoundException;
 import server.handlers.*;
 import server.processing.ClientProcessing;
 import server.processing.RestartingEnvironment;
-import server.processing.ServerProcessing;
 import server.room.Room;
-import server.room.RoomProcessing;
+import server.processing.RoomProcessing;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
 import java.util.InvalidPropertiesFormatException;
 
 import static common.Utils.buildMessage;
@@ -65,9 +61,8 @@ class RequestHandler {
                     responseMessage = rh.handle();
                     break;
                 case DELETE_ROOM:
-                    if (clientListener.isMessageNotFromThisLoggedClient(message)) {
-                        responseMessage = new Message(MessageStatus.DENIED).setText("Wrong passed clientId");
-                    }
+                    rh = new DeleteRoomRequestHandler(clientListener, message);
+                    responseMessage = rh.handle();
                     break;
                 case INVITE_USER:
                     if (clientListener.isMessageNotFromThisLoggedClient(message)) {
@@ -168,18 +163,20 @@ class RequestHandler {
     /**
      * The method {@code userUnban} handles with requests of unblocking a user.
      *
-     * @param message an instance of {@code Message} that represents a request about blocking a user.
-     *                NOTE! It is expected that message contains following non-null fields
-     *                1) {@code fromId} - id of registered user who has admin rights
-     *                i.e. an instance of {@code Client} representing his account
-     *                has {@code isAdmin == true}
-     *                2)  {@code toId} - id of registered client who is currently banned
-     * @return an instance of {@code Message} that contains info about performed (or not) operation.
-     * It may be of the following statuses:
-     * {@code MessageStatus.ACCEPTED}  -   if the specified client has been unbanned
-     * {@code MessageStatus.DENIED}    -   if the sender is not an admin or specified client
-     * is not currently banned
-     * {@code MessageStatus.ERROR}     -   if an error occurred while executing the operation
+     * @param           message an instance of {@code Message} that represents a request about blocking a user.
+     *
+     *                  NOTE! It is expected that message contains following non-null fields
+     *                      1) {@code fromId} - id of registered user who has admin rights
+     *                          i.e. an instance of {@code Client} representing his account
+     *                          has {@code isAdmin == true}
+     *                      2)  {@code toId} - id of registered client who is currently banned
+     *
+     * @return          an instance of {@code Message} that contains info about performed (or not) operation.
+     *                  It may be of the following statuses:
+     *                      1) {@code MessageStatus.ACCEPTED}  -   if the specified client has been unbanned
+     *                      2) {@code MessageStatus.DENIED}    -   if the sender is not an admin or specified client
+     *                          is not currently banned
+     *                      3) {@code MessageStatus.ERROR}     -   if an error occurred while executing the operation
      */
     private Message clientUnban(Message message) {
         String errorMessage;
@@ -255,21 +252,23 @@ class RequestHandler {
     /**
      * This method handles with the request for the list of the client rooms
      *
-     * @param message is the request message
-     *                NOTE! It is expected that message contains following non-null fields
-     *                1) {@code fromId} - an id of registered user who has logged in
-     *                2) {@code roomId} - an id of the room where the client is a member
-     *                <p>
-     *                NOTE! This method sends the message history by parts - message by message. The contract of the
-     *                method is that the caller will send the resulting message of status
-     *                {@code MessageStatus.ACCEPTED} to the client i.e.
-     *                when the caller obtain success confirmation that means that client has already
-     *                received the history
-     * @return an instance of {@code Message} that contains info about performed (or not) operation.
-     * It may be of the following statuses
-     * {@code MessageStatus.ACCEPTED}  -   if the history has been sent
-     * {@code MessageStatus.DENIED}    -   if the reques has been obtained from unlogged user
-     * {@code MessageStatus.ERROR}     -   if an error occurred while executing the operation
+     * @param           message is the request message
+     *                          NOTE! It is expected that message contains following non-null fields
+     *                          1) {@code fromId} - an id of registered user who has logged in
+     *                          2) {@code roomId} - an id of the room where the client is a member
+     *
+     *  NOTE! This method sends the message history by parts - message by message. The contract of the
+     * method is that the caller will send the resulting message of status {@code MessageStatus.ACCEPTED}
+     * to the client i.e. when the caller obtain success confirmation
+     * that means that client has already received the history
+     *
+     * @return          an instance of {@code Message} that contains info about performed (or not) operation.
+     *                  It may be of the following statuses
+     *                          1) {@code MessageStatus.ACCEPTED}  -   if the history has been sent
+     *                          2) {@code MessageStatus.DENIED}    -   if the request has been obtained
+     *                                                                 from unlogged user
+     *                          3) {@code MessageStatus.ERROR}     -   if an error occurred
+     *                                                                 while executing the operation
      */
     private synchronized Message getRoomMessages(Message message) {
         if (message == null) {
@@ -286,7 +285,7 @@ class RequestHandler {
             if (RoomProcessing.hasRoomBeenCreated(clientListener.getServer().getConfig(), message.getRoomId()) != 0L) {
                 try {
                     RoomProcessing.loadRoom(clientListener.getServer(), message.getRoomId());
-                } catch (InvalidPropertiesFormatException | RoomNotFoundException e) {
+                } catch (RoomNotFoundException e) {
                     return new Message(MessageStatus.ERROR).setText(e.getLocalizedMessage());
                 }
             }
@@ -354,12 +353,7 @@ class RequestHandler {
             String errorMessage;
             try {
                 RoomProcessing.loadRoom(clientListener.getServer(), message.getRoomId());
-            } catch (InvalidPropertiesFormatException e) {
-                if (LOGGER.isEnabledFor(Level.ERROR)) {
-                    LOGGER.error(buildMessage("Unknown error", e.getClass().getName(), ' ', e.getMessage()));
-                }
-                return new Message(MessageStatus.ERROR).setText("Internal error");
-            } catch (RoomNotFoundException e) {
+            }  catch (RoomNotFoundException e) {
                 errorMessage = buildMessage("Unable to find a room (id", message.getRoomId(), ')');
                 if (LOGGER.isEnabledFor(Level.TRACE)) {
                     LOGGER.trace(errorMessage);
@@ -424,11 +418,6 @@ class RequestHandler {
             String errorMessage;
             try {
                 RoomProcessing.loadRoom(clientListener.getServer(), message.getRoomId());
-            } catch (InvalidPropertiesFormatException e) {
-                if (LOGGER.isEnabledFor(Level.ERROR)) {
-                    LOGGER.error(buildMessage("Unknown error", e.getClass().getName(), e.getMessage()));
-                }
-                return new Message(MessageStatus.ERROR).setText("Internal error");
             } catch (RoomNotFoundException e) {
                 errorMessage = buildMessage("Unable to find a room");
                 if (LOGGER.isEnabledFor(Level.TRACE)) {
@@ -522,14 +511,7 @@ class RequestHandler {
         }
         Room room;
         if (!clientListener.getServer().getOnlineRooms().safe().containsKey(roomId)) {
-            try {
-                RoomProcessing.loadRoom(clientListener.getServer(), roomId);
-            } catch (InvalidPropertiesFormatException e) {
-                if (LOGGER.isEnabledFor(Level.ERROR)) {
-                    LOGGER.error(buildMessage(e.getClass().getName(), "occurred:", e.getLocalizedMessage()));
-                }
-                return new Message(MessageStatus.ERROR).setText("Internal error occurred");
-            }
+            RoomProcessing.loadRoom(clientListener.getServer(), roomId);
         }
         room = clientListener.getServer().getOnlineRooms().safe().get(roomId);
         StringBuilder stringBuilder = new StringBuilder();

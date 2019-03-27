@@ -4,7 +4,7 @@ import common.entities.message.Message;
 import common.entities.message.MessageStatus;
 import server.client.ClientListener;
 import server.exceptions.RoomNotFoundException;
-import server.room.RoomProcessing;
+import server.processing.RoomProcessing;
 
 import java.io.IOException;
 

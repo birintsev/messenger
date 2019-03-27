@@ -5,7 +5,7 @@ import common.entities.message.MessageStatus;
 import server.client.Client;
 import server.client.ClientListener;
 import server.room.Room;
-import server.room.RoomProcessing;
+import server.processing.RoomProcessing;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -74,17 +74,9 @@ public class RegistrationRequestHandler extends RequestHandler {
         } catch (NullPointerException e) {
             return new Message(MessageStatus.ERROR)
                     .setText("Check whether you have specified all the necessary parameters");
-        } catch (InvalidPropertiesFormatException e) {
-            LOGGER.error("Wrong properties");
-            throw new RuntimeException(e);
         }
         if (!clientListener.getServer().getOnlineRooms().safe().containsKey(0)) {
-            try {
-                RoomProcessing.loadRoom(clientListener.getServer(), 0);
-            } catch (InvalidPropertiesFormatException e) {
-                LOGGER.error(buildMessage("Unknown server configuration error occurred", e.getMessage()));
-                throw new RuntimeException(e);
-            }
+            RoomProcessing.loadRoom(clientListener.getServer(), 0);
         }
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Client.class);
