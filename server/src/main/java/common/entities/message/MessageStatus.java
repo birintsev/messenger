@@ -1,0 +1,27 @@
+package common.entities.message;
+
+public enum MessageStatus {
+    AUTH,
+    REGISTRATION,
+    MESSAGE,
+    CLIENTBAN,
+    CLIENTUNBAN,
+    CREATE_ROOM,
+    DELETE_ROOM,
+    INVITE_USER,
+    UNINVITE_USER,
+    ACCEPTED,
+    DENIED,
+    ERROR,
+    STOP_SERVER,
+    KICK,
+    NEW_MESSAGE,
+    NEW_ROOM_MEMBER,
+    MEMBER_LEFT_ROOM,
+    ROOM_LIST,
+    RESTART_SERVER,
+    ROOM_MEMBERS,
+    MESSAGE_HISTORY,
+    GET_CLIENT_NAME,
+    GET_ROOM_MEMBERS
+}

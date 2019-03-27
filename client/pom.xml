@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>messenger2</artifactId>
+        <groupId>messenger2</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>client</artifactId>
+
+    <name>client</name>
+    <!-- FIXME change it to the project's website -->
+    <url>http://www.example.com</url>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/log4j/log4j -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>com.jfoenix</groupId>
+            <artifactId>jfoenix</artifactId>
+            <version>8.0.8</version>
+        </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>com.jfoenix</groupId>-->
+            <!--<artifactId>jfoenix</artifactId>-->
+            <!--<version>9.0.8</version>-->
+        <!--</dependency>-->
+
+    </dependencies>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <build>
+
+        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+            <plugins>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <executions>
+                        <execution>
+                            <id>copy-resources-views</id>
+                            <!-- here the phase you need -->
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${basedir}/target/classes/messenger2/views</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>src/main/java/messenger2/views</directory>
+                                        <filtering>true</filtering>
+                                    </resource>
+
+                                </resources>
+
+
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>copy-resources-config</id>
+                            <!-- here the phase you need -->
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${basedir}/target/classes/messenger2/config</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>src/main/java/messenger2/config</directory>
+                                        <filtering>true</filtering>
+                                    </resource>
+
+
+                                </resources>
+
+
+
+                            </configuration>
+                        </execution>
+
+                    </executions>
+
+                </plugin>
+
+                <!--<plugin>-->
+                    <!--<artifactId>maven-resources-plugin</artifactId>-->
+                    <!--<version>3.1.0</version>-->
+                    <!--<executions>-->
+                        <!--<execution>-->
+                            <!--<id>copy-resources</id>-->
+                            <!--&lt;!&ndash; here the phase you need &ndash;&gt;-->
+                            <!--<phase>validate</phase>-->
+                            <!--<goals>-->
+                                <!--<goal>copy-resources</goal>-->
+                            <!--</goals>-->
+                            <!--<configuration>-->
+                                <!--<outputDirectory>${basedir}/target/classes/messenger2/res</outputDirectory>-->
+                                <!--<resources>-->
+                                    <!--<resource>-->
+                                        <!--<directory>src/main/java/messenger2/res</directory>-->
+                                        <!--<filtering>true</filtering>-->
+                                    <!--</resource>-->
+                                <!--</resources>-->
+                            <!--</configuration>-->
+                        <!--</execution>-->
+                    <!--</executions>-->
+                <!--</plugin>-->
+
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <addMavenDescriptor>false</addMavenDescriptor>
+                            <compress>true</compress>
+                            <manifest>
+                                <mainClass>messenger2.App</mainClass>
+                                <addClasspath>true</addClasspath>
+                                <classpathPrefix>../views/</classpathPrefix>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+        <resources>
+            <resource>
+                <targetPath>messenger2/res</targetPath>
+                <directory>src/main/java/messenger2/res</directory>
+            </resource>
+        </resources>
+    </build>
+
+</project>
