@@ -7,10 +7,7 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import server.exceptions.ClientNotFoundException;
 import server.exceptions.RoomNotFoundException;
-import server.handlers.AuthorizationRequestHandler;
-import server.handlers.ClientBanRequestHandler;
-import server.handlers.MessageSendingRequestHandler;
-import server.handlers.RegistrationRequestHandler;
+import server.handlers.*;
 import server.processing.ClientProcessing;
 import server.processing.RestartingEnvironment;
 import server.processing.ServerProcessing;
@@ -64,10 +61,8 @@ class RequestHandler {
                     responseMessage = rh.handle();
                     break;
                 case CREATE_ROOM:
-                    if (clientListener.isMessageNotFromThisLoggedClient(message)) {
-                        responseMessage = new Message(MessageStatus.DENIED).setText("Wrong passed clientId");
-                    }
-                    responseMessage = createRoom(message);
+                    rh = new CreateRoomRequestHandler(clientListener, message);
+                    responseMessage = rh.handle();
                     break;
                 case DELETE_ROOM:
                     if (clientListener.isMessageNotFromThisLoggedClient(message)) {
@@ -87,6 +82,7 @@ class RequestHandler {
                     } else {
                         responseMessage = kickClientFromRoom(message);
                     }
+                    break;
                 case STOP_SERVER:
                     responseMessage = stopServer(message);
                     if (MessageStatus.ACCEPTED.equals(responseMessage.getStatus())) {
@@ -167,45 +163,6 @@ class RequestHandler {
             return new Message(MessageStatus.DENIED).setText("Please, check your login and password");
         }
         return new Message(MessageStatus.ACCEPTED).setText("Server is going to shut down");
-    }
-
-    /**
-     * The method {@code createRoom} handles with an input request representing by {@code Message}
-     * having {@code MessageStatus.CREATE_ROOM} status
-     *
-     * @param message a command that contains the {@code clientId} of a creator
-     * @return an instance of {@code Message} that informs whether new room was created or not
-     */
-    private Message createRoom(@NotNull Message message) {
-        if (clientListener.isMessageNotFromThisLoggedClient(message)) {
-            return new Message(MessageStatus.DENIED).setText("Please, log in first");
-        }
-        if (!MessageStatus.CREATE_ROOM.equals(message.getStatus())) {
-            LOGGER.error(buildMessage("Unexpected message status. Expected"
-                    , MessageStatus.CREATE_ROOM, ". But found", message.getStatus()));
-            return new Message(MessageStatus.ERROR)
-                    .setText(buildMessage("The message status must be "
-                            , MessageStatus.CREATE_ROOM, " but found ", message.getStatus()));
-        }
-        /*
-         *   The field toId is considered as an id of the initial room member, thus it must be valid
-         * i.e. the client with such id must exists
-         * */
-        try {
-            Room room = RoomProcessing.createRoom(clientListener.getServer(), message.getFromId());
-            if (room == null) {
-                return new Message(MessageStatus.ERROR).setText("Some error has occurred during the room creation");
-            } else {
-                clientListener.getClient().getRooms().safe().add(room.getRoomId());
-                LOGGER.trace(new StringBuilder("New room (id").append(room.getRoomId()).append(") has been created"));
-                return new Message(MessageStatus.ACCEPTED).setRoomId(room.getRoomId())
-                        .setText(buildMessage("The room (id"
-                                , room.getRoomId(), ") has been successfully created"));
-            }
-        } catch (InvalidPropertiesFormatException e) { // error while room creation
-            LOGGER.error(e.getLocalizedMessage());
-            return new Message(MessageStatus.ERROR).setText("Internal has error occurred");
-        }
     }
 
     /**
