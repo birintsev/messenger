@@ -1,4 +1,7 @@
 .idea
+.iml
 messenger2.iml
 /client/target
 /server/target
+/server/*.iml
+/client/*.iml
