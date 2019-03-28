@@ -72,11 +72,8 @@ class RequestHandler {
                     responseMessage = rh.handle();
                     break;
                 case STOP_SERVER:
-                    responseMessage = stopServer(message);
-                    if (MessageStatus.ACCEPTED.equals(responseMessage.getStatus())) {
-                        LOGGER.trace("Interrupting the server");
-                        clientListener.getServer().interrupt();
-                    }
+                    rh = new StopServerRequestHandler(clientListener, message);
+                    responseMessage = rh.handle();
                     break;
                 case ROOM_LIST:
                     if (clientListener.isLogged()) {
@@ -136,21 +133,6 @@ class RequestHandler {
         RestartingEnvironment restartingEnvironment = new RestartingEnvironment(clientListener.getServer());
         restartingEnvironment.start();
         return new Message(MessageStatus.ACCEPTED).setText("The server is going to stop the work");
-    }
-
-    private Message stopServer(@NotNull Message message) {
-        if (!MessageStatus.STOP_SERVER.equals(message.getStatus())) {
-            String errorMessage = buildMessage("Message of status", MessageStatus.STOP_SERVER
-                    , "was expected, but found", message.getStatus());
-            LOGGER.warn(errorMessage);
-            return new Message(MessageStatus.ERROR).setText("Internal error: ".concat(errorMessage));
-        }
-        if (!clientListener.getServer().getConfig().getProperty("serverLogin").equals(message.getLogin())
-                || !clientListener.getServer().getConfig().getProperty("serverPassword")
-                .equals(message.getPassword())) {
-            return new Message(MessageStatus.DENIED).setText("Please, check your login and password");
-        }
-        return new Message(MessageStatus.ACCEPTED).setText("Server is going to shut down");
     }
 
     /**
