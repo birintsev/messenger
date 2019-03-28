@@ -17,7 +17,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.InvalidPropertiesFormatException;
 
 import static common.Utils.buildMessage;
 import static server.processing.ClientProcessing.loadClient;
@@ -65,11 +64,8 @@ class RequestHandler {
                     responseMessage = rh.handle();
                     break;
                 case INVITE_USER:
-                    if (clientListener.isMessageNotFromThisLoggedClient(message)) {
-                        responseMessage = new Message(MessageStatus.DENIED).setText("Wrong passed clientId");
-                    } else {
-                        responseMessage = addClientToRoom(message);
-                    }
+                    rh = new InviteClientRequestHandler(clientListener, message);
+                    responseMessage = rh.handle();
                     break;
                 case UNINVITE_USER:
                     if (clientListener.isMessageNotFromThisLoggedClient(message)) {
@@ -330,70 +326,7 @@ class RequestHandler {
         return new Message(MessageStatus.ROOM_LIST).setText(stringBuilder.substring(0, stringBuilder.length() - 1));
     }
 
-    private Message addClientToRoom(@NotNull Message message) {
-        if (message.getFromId() == null) {
-            if (LOGGER.isEnabledFor(Level.WARN)) {
-                LOGGER.warn("null fromId");
-            }
-            return new Message(MessageStatus.ERROR).setText("Missed addresser id");
-        }
-        if (message.getToId() == null) {
-            if (LOGGER.isEnabledFor(Level.WARN)) {
-                LOGGER.warn("null toId");
-            }
-            return new Message(MessageStatus.ERROR).setText("Missed client to be invited");
-        }
-        if (message.getRoomId() == null) {
-            if (LOGGER.isEnabledFor(Level.WARN)) {
-                LOGGER.warn("null roomId");
-            }
-            return new Message(MessageStatus.ERROR).setText("Missed roomId");
-        }
-        if (!clientListener.getServer().getOnlineRooms().safe().containsKey(message.getRoomId())) {
-            String errorMessage;
-            try {
-                RoomProcessing.loadRoom(clientListener.getServer(), message.getRoomId());
-            }  catch (RoomNotFoundException e) {
-                errorMessage = buildMessage("Unable to find a room (id", message.getRoomId(), ')');
-                if (LOGGER.isEnabledFor(Level.TRACE)) {
-                    LOGGER.trace(errorMessage);
-                }
-                return new Message(MessageStatus.DENIED).setText(buildMessage(errorMessage));
-            }
-        }
-        Room room = clientListener.getServer().getOnlineRooms().safe().get(message.getRoomId());
-        if (!room.getMembers().safe().contains(message.getFromId())) {
-            if (LOGGER.isEnabledFor(Level.TRACE)) {
-                LOGGER.trace(buildMessage("The client id", message.getFromId()
-                        , "is not a member of the room id", message.getRoomId()));
-            }
-            return new Message(MessageStatus.DENIED).setText("Not a member of the room");
-        }
-        if (room.getMembers().safe().contains(message.getToId())) {
-            if (LOGGER.isEnabledFor(Level.TRACE)) {
-                LOGGER.trace(buildMessage("Attempt to remove client (id", message.getToId()
-                        , ") who is already a member of the room (id", message.getRoomId(), ')'));
-            }
-            return new Message(MessageStatus.DENIED).setText("This client is already a member of the room");
-        }
-        room.getMembers().safe().add(message.getToId());
-        String infoString = buildMessage("Client (id", message.getToId()
-                , ") now is a member of the room (id", message.getRoomId(), ')');
-        Client client;
-        if (clientListener.getServer().getOnlineClients().safe().containsKey(message.getToId())) {
-            client = clientListener.getServer().getOnlineClients().safe().get(message.getToId()).getClient();
-            clientListener.getServer().getOnlineClients().safe().get(message.getToId()).sendMessageToConnectedClient(
-                    new Message(MessageStatus.UNINVITE_USER).setText("You have been invited to the room")
-                            .setRoomId(message.getRoomId()));
-        } else {
-            client = ClientProcessing.loadClient(clientListener.getServer().getConfig(), message.getToId());
-        }
-        client.getRooms().safe().add(message.getRoomId());
-        if (LOGGER.isEnabledFor(Level.TRACE)) {
-            LOGGER.trace(infoString);
-        }
-        return new Message(MessageStatus.ACCEPTED).setText(infoString);
-    }
+
 
     private Message kickClientFromRoom(@NotNull Message message) {
         if (message.getFromId() == null) {
