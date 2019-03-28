@@ -86,6 +86,8 @@ public class AuthorizationRequestHandler extends RequestHandler {
                 clientListener.setClient(client);
                 clientListener.getClient().setServer(clientListener.getServer());
                 LOGGER.trace(buildMessage("Client (id", client.getClientId(), ") has logged in"));
+                clientListener.getServer().getOnlineClients().safe()
+                        .put(clientListener.getClient().getClientId(), clientListener);
                 return new Message(MessageStatus.ACCEPTED);
             } else {
                 if (LOGGER.isEnabledFor(Level.TRACE)) {
