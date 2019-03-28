@@ -9,7 +9,7 @@ public enum MessageStatus {
     CREATE_ROOM,
     DELETE_ROOM,
     INVITE_USER,
-    UNINVITE_USER,
+    UNINVITE_CLIENT,
     ACCEPTED,
     DENIED,
     ERROR,
