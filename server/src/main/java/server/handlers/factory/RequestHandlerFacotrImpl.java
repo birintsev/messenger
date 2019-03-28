@@ -10,8 +10,6 @@ import static common.Utils.buildMessage;
 
 public class RequestHandlerFacotrImpl implements RequestHandlerFactory {
 
-    private static final RequestHandlerFactory requestHandlerFactory = new RequestHandlerFacotrImpl();
-
     public RequestHandlerFacotrImpl() {
     }
 
