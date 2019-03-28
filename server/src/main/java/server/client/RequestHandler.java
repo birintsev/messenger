@@ -76,11 +76,8 @@ class RequestHandler {
                     responseMessage = rh.handle();
                     break;
                 case ROOM_LIST:
-                    if (clientListener.isLogged()) {
-                        responseMessage = getRooms();
-                    } else {
-                        responseMessage = new Message(MessageStatus.DENIED).setText("Has not been logged");
-                    }
+                    rh = new RoomListRequestHandler(clientListener, message);
+                    responseMessage = rh.handle();
                     break;
                 case CLIENTUNBAN:
                     responseMessage = clientUnban(message);
@@ -290,19 +287,6 @@ class RequestHandler {
         }
         return new Message(MessageStatus.ACCEPTED).setText("This is the end of the room message history")
                 .setRoomId(message.getRoomId());
-    }
-
-    private synchronized Message getRooms() {
-        if (clientListener.getClient().getRooms().safe().size() == 0) {
-            return new Message(MessageStatus.ROOM_LIST).setText("");
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        synchronized (clientListener.getClient().getRooms().safe()) {
-            for (int roomId : clientListener.getClient().getRooms().safe()) {
-                stringBuilder.append(roomId).append(',');
-            }
-        }
-        return new Message(MessageStatus.ROOM_LIST).setText(stringBuilder.substring(0, stringBuilder.length() - 1));
     }
 
     private Message getClientName(Message message) {
