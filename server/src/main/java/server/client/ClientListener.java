@@ -38,7 +38,7 @@ public class ClientListener extends Thread {
     private Client client;
     private RequestHandler requestHandler;
 
-    Shell<DataOutputStream> getOut() {
+    public Shell<DataOutputStream> getOut() {
         return out;
     }
 

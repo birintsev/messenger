@@ -258,7 +258,7 @@ public class RoomProcessing {
     public static boolean isMember(@NotNull Properties serverProperties, int clientId, int roomId) {
         if (!PropertiesProcessing.arePropertiesValid(serverProperties)
                 || RoomProcessing.hasRoomBeenCreated(serverProperties, roomId) == 0L
-                || !ClientProcessing.hasNotAccountBeenRegistered(serverProperties,clientId)) {
+                || ClientProcessing.hasNotAccountBeenRegistered(serverProperties,clientId)) {
             return false;
         }
         XPath xPath = XPathFactory.newInstance().newXPath();
