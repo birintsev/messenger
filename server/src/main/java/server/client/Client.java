@@ -92,7 +92,7 @@ public class Client implements Saveable {
         return rooms;
     }
 
-    String getLogin() {
+    public String getLogin() {
         return login;
     }
 
