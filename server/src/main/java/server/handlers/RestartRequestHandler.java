@@ -7,17 +7,15 @@ import server.processing.RestartingEnvironment;
 
 public class RestartRequestHandler extends RequestHandler {
 
-    public RestartRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public RestartRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = restartServer(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return restartServer(clientListener, message);
     }
 
-    private Message restartServer(Message message) {
+    private Message restartServer(ClientListener clientListener, Message message) {
         if ((clientListener.isMessageNotFromThisLoggedClient(message))
                 && !message.getLogin().equals(clientListener.getServer().getConfig().getProperty("serverLogin"))
                 && !message.getPassword().equals(

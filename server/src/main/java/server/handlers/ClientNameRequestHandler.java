@@ -8,19 +8,17 @@ import server.processing.ClientProcessing;
 
 import static common.Utils.buildMessage;
 
-public class ClientNameRequesHandler extends RequestHandler {
+public class ClientNameRequestHandler extends RequestHandler {
 
-    public ClientNameRequesHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public ClientNameRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = getClientName(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return getClientName(clientListener, message);
     }
 
-    private Message getClientName(Message message) {
+    private Message getClientName(ClientListener clientListener, Message message) {
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED)
                     .setText("Log in prior to request information");

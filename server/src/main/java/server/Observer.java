@@ -2,6 +2,7 @@ package server;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+import org.apache.log4j.Level;
 import server.client.ClientListener;
 import server.processing.ServerProcessing;
 import server.room.Room;
@@ -45,21 +46,23 @@ public class Observer extends Thread {
             // This loop saves the room in case if there is not longer any online member on a sever
             try {
                 synchronized (server.getOnlineRooms().safe()) {
-                    LOGGER.trace("Removing rooms");
+                    if (LOGGER.isEnabledFor(Level.DEBUG)) {
+                        LOGGER.trace("Cleaning online rooms");
+                    }
                     for (Map.Entry<Integer, Room> roomWrapper : onlineRooms.entrySet()) {
                         if (roomWrapper.getValue().getRoomId() == 0) {
                             continue;
                         }
-                        boolean toBeSavedAndReamoved = true;
+                        boolean toBeSavedAndRemoved = true;
                         for (int clientId : roomWrapper.getValue().getMembers().safe()) {
                             if (server.getOnlineClients().safe().containsKey(clientId)) {
-                                toBeSavedAndReamoved = false;
+                                toBeSavedAndRemoved = false;
                             }
-                            if (!toBeSavedAndReamoved) {
+                            if (!toBeSavedAndRemoved) {
                                 break;
                             }
                         }
-                        if (toBeSavedAndReamoved) {
+                        if (toBeSavedAndRemoved) {
                             LOGGER.trace(buildMessage("Saving the room (id", roomWrapper.getValue().getRoomId(), ')'));
                             server.getOnlineRooms().safe().remove(roomWrapper.getKey());
                             if (roomWrapper.getValue().save() && !server.getOnlineRooms().safe()
@@ -77,7 +80,9 @@ public class Observer extends Thread {
                 continue;
             }
             synchronized (server.getOnlineClients().safe()) {
-                LOGGER.trace("Removing clients");
+                if (LOGGER.isEnabledFor(Level.DEBUG)) {
+                    LOGGER.trace("Cleaning online clients");
+                }
                 for (Map.Entry<Integer, ClientListener> clientListenerWrapper : onlineClients.entrySet()) {
                     ClientListener clientListener = clientListenerWrapper.getValue();
                     if (clientListener.getSocket().isClosed()) {
@@ -97,7 +102,7 @@ public class Observer extends Thread {
             try {
                 sleep(60000);
             } catch (InterruptedException e) {
-                LOGGER.fatal("Observer has been interrupted");
+                LOGGER.fatal(buildMessage("Observer has been interrupted:", e.getLocalizedMessage()));
                 break;
             }
         }

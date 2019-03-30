@@ -328,7 +328,7 @@ public class RoomProcessing {
         }
         if (file.isDirectory()) {
             Set<File> children;
-            File [] chldrn = file.listFiles();
+            @SuppressWarnings("SpellCheckingInspection") File [] chldrn = file.listFiles();
             if (chldrn == null) {
                 return;
             }

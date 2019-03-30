@@ -6,17 +6,15 @@ import server.client.ClientListener;
 
 public class RoomListRequestHandler extends RequestHandler {
 
-    public RoomListRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public RoomListRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = getRooms(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return getRooms(clientListener, message);
     }
 
-    private synchronized Message getRooms(Message message) {
+    private synchronized Message getRooms(ClientListener clientListener, Message message) {
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.ERROR).setText("Log in prior");
         }

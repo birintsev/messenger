@@ -22,21 +22,16 @@ import static common.Utils.buildMessage;
  *  This {@code RequestHandler} implementation handles with clients requests of removing the rooms
  * */
 public class DeleteRoomRequestHandler extends RequestHandler {
-    public DeleteRoomRequestHandler(Message message) {
-        super(message);
-    }
 
-    public DeleteRoomRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public DeleteRoomRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = deleteRoom(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return deleteRoom(clientListener, message);
     }
 
-    private Message deleteRoom(Message message) {
+    private Message deleteRoom(ClientListener clientListener, Message message) {
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED).setText("Please, log in prior room deleting");
         }
@@ -56,7 +51,7 @@ public class DeleteRoomRequestHandler extends RequestHandler {
             return new Message(MessageStatus.DENIED)
                     .setText("Not enough rights to perform room deleting action").setRoomId(roomId);
         }
-        removeRoomFromClientRoomLists(clientListener.getServer(), roomId);
+        removeRoomFromClientsRoomLists(clientListener.getServer(), roomId);
         RoomProcessing.permanentRemoveRoom(clientListener.getServer(), roomId);
         informClientsAboutRoomDeleting(clientListener.getServer().getOnlineClients(), roomId);
         clientListener.getServer().getOnlineRooms().safe().remove(roomId);
@@ -76,13 +71,13 @@ public class DeleteRoomRequestHandler extends RequestHandler {
         for (Map.Entry<Integer, ClientListener> entry : rm.entrySet()) {
             synchronized (entry.getValue()) {
                 if (entry.getValue().getClient().getRooms().safe().contains(roomId)) {
-                    clientListener.sendMessageToConnectedClient(info);
+                    entry.getValue().sendMessageToConnectedClient(info);
                 }
             }
         }
     }
 
-    private void removeRoomFromClientRoomLists(@NotNull Server server, int roomId) {
+    private void removeRoomFromClientsRoomLists(@NotNull Server server, int roomId) {
         Room room;
         if (!server.getOnlineRooms().safe().containsKey(roomId)) {
             RoomProcessing.loadRoom(server, roomId);
@@ -99,7 +94,7 @@ public class DeleteRoomRequestHandler extends RequestHandler {
                         client = ClientProcessing.loadClient(server.getConfig(), clientId);
                     }
                     client.getRooms().safe().remove(roomId);
-                    client.setServer(clientListener.getServer());
+                    client.setServer(server);
                     client.save();
                 } catch (ClientNotFoundException e) {
                     if (LOGGER.isEnabledFor(Level.WARN)) {

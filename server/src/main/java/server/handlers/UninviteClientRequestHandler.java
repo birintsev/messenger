@@ -14,17 +14,13 @@ import server.room.Room;
 import static common.Utils.buildMessage;
 
 public class UninviteClientRequestHandler extends RequestHandler {
-    public UninviteClientRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
-    }
 
     @Override
-    public Message handle() {
-        Message responseMessage = kickClientFromRoom(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return kickClientFromRoom(message, clientListener);
     }
 
-    private Message kickClientFromRoom(@NotNull Message message) {
+    private Message kickClientFromRoom(@NotNull Message message, ClientListener clientListener) {
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED).setText("Wrong passed clientId");
         }
@@ -87,11 +83,11 @@ public class UninviteClientRequestHandler extends RequestHandler {
         if (client.getServer() == null) {
             client.setServer(clientListener.getServer());
         }
+        client.save();
         if (room.getServer() == null) {
             room.setServer(clientListener.getServer());
         }
         room.save();
-        client.save();
         String infoString = buildMessage("Now client (id", message.getToId()
                 , ") is not a member of the room (id", message.getRoomId(), ')');
         if (LOGGER.isEnabledFor(Level.TRACE)) {
@@ -99,5 +95,4 @@ public class UninviteClientRequestHandler extends RequestHandler {
         }
         return new Message(MessageStatus.ACCEPTED).setText(infoString);
     }
-
 }

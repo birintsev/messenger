@@ -18,18 +18,16 @@ import static common.Utils.buildMessage;
 
 public class MessageHistoryRequestHandler extends RequestHandler {
 
-    public MessageHistoryRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public MessageHistoryRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = getRoomMessages(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return getRoomMessages(clientListener, message);
     }
 
     /**
-     * This method handles with the request for the list of the client rooms
+     *  This method handles with the request for the list of the client rooms
      *
      * @param           message is the request message
      *                          NOTE! It is expected that message contains following non-null fields
@@ -49,7 +47,7 @@ public class MessageHistoryRequestHandler extends RequestHandler {
      *                          3) {@code MessageStatus.ERROR}     -   if an error occurred
      *                                                                 while executing the operation
      */
-    private synchronized Message getRoomMessages(Message message) {
+    private synchronized Message getRoomMessages(ClientListener clientListener, Message message) {
         if (message == null) {
             return new Message(MessageStatus.ERROR).setText("Internal error occurred. Message is null");
         }

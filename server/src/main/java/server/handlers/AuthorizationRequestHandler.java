@@ -17,32 +17,27 @@ import java.time.LocalDateTime;
 import static common.Utils.buildMessage;
 
 public class AuthorizationRequestHandler extends RequestHandler {
-    public AuthorizationRequestHandler(Message message) {
-        super(message);
-    }
-
-    public AuthorizationRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public AuthorizationRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = auth(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return auth(clientListener, message);
     }
 
     /**
-     * The method that turns an incoming connection to a client's session
+     *  The method that turns an incoming connection to a client's session
      * Verifies the {@code message} of status {@code MessageStatus.AUTH} comparing the incoming user data
      * such as a login and a password.
      *
-     * @param message a message of {@code MessageStatus.AUTH} containing a login and a password
+     * @param           message a message of {@code MessageStatus.AUTH} containing a login and a password
      *
-     * @throws ClientNotFoundException  if the specified client's file has not been found
-     *                                  in the {@code clientsDir} folder or there is not user data file
-     * @throws NullPointerException     in case when message equals {@code null}
+     * @throws          ClientNotFoundException  if the specified client's file has not been found
+     *                  in the {@code clientsDir} folder or there is not user data file
+     *
+     * @throws          NullPointerException     in case when message equals {@code null}
      */
-    private Message auth(Message message) {
+    private Message auth(ClientListener clientListener, Message message) {
         if (message == null) {
             return new Message(MessageStatus.ERROR).setText("Internal error");
         }
@@ -70,9 +65,9 @@ public class AuthorizationRequestHandler extends RequestHandler {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             Client client = (Client) unmarshaller.unmarshal(clientFile);
             if (client.isBaned()) {
-                if (LocalDateTime.now().isBefore(client.getIsBannedUntill())) {
+                if (LocalDateTime.now().isBefore(client.getIsBannedUntil())) {
                     return new Message(MessageStatus.DENIED).setText(buildMessage("You are banned until"
-                            , ServerProcessing.DATE_TIME_FORMATTER.format(client.getIsBannedUntill())));
+                            , ServerProcessing.DATE_TIME_FORMATTER.format(client.getIsBannedUntil())));
                 } else {
                     client.setBaned(false);
                     client.setIsBannedUntil(null);

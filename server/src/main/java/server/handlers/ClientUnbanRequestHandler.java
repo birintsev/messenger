@@ -11,18 +11,16 @@ import static common.Utils.buildMessage;
 
 public class ClientUnbanRequestHandler extends RequestHandler {
 
-    public ClientUnbanRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public ClientUnbanRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = clientUnban(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return clientUnban(clientListener, message);
     }
 
     /**
-     * The method {@code userUnban} handles with requests of unblocking a user.
+     *  The method {@code userUnban} handles with requests of unblocking a user.
      *
      * @param           message an instance of {@code Message} that represents a request about blocking a user.
      *
@@ -39,7 +37,7 @@ public class ClientUnbanRequestHandler extends RequestHandler {
      *                          is not currently banned
      *                      3) {@code MessageStatus.ERROR}     -   if an error occurred while executing the operation
      */
-    private Message clientUnban(Message message) {
+    private Message clientUnban(ClientListener clientListener, Message message) {
         String errorMessage;
         if (message == null) {
             if (LOGGER.isEnabledFor(Level.ERROR)) {

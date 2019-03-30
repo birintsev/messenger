@@ -14,21 +14,16 @@ import server.room.Room;
 import static common.Utils.buildMessage;
 
 public class InviteClientRequestHandler extends RequestHandler {
-    public InviteClientRequestHandler(Message message) {
-        super(message);
-    }
 
-    public InviteClientRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public InviteClientRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = addClientToRoom(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return addClientToRoom(clientListener, message);
     }
 
-    private Message addClientToRoom(@NotNull Message message) {
+    private Message addClientToRoom(ClientListener clientListener, @NotNull Message message) {
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED).setText("Log in prior perform any request");
         }

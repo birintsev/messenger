@@ -12,14 +12,13 @@ import java.util.InvalidPropertiesFormatException;
 import static common.Utils.buildMessage;
 
 public class CreateRoomRequestHandler extends RequestHandler {
-    public CreateRoomRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+
+    public CreateRoomRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = createRoom(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return createRoom(clientListener, message);
     }
 
     /**
@@ -30,7 +29,7 @@ public class CreateRoomRequestHandler extends RequestHandler {
      *
      * @return          an instance of {@code Message} that informs whether new room was created or not
      */
-    private Message createRoom(@NotNull Message message) {
+    private Message createRoom(@NotNull ClientListener clientListener, @NotNull Message message) {
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED).setText("Wrong passed clientId");
         }

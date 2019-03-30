@@ -37,16 +37,16 @@ public class Client implements Saveable {
     private boolean isAdmin;
     private boolean baned;
     @XmlJavaTypeAdapter(value = Message.LocalDateTimeAdapter.class)
-    private LocalDateTime isBannedUntill;
+    private LocalDateTime isBannedUntil;
     @XmlTransient
     private Server server;
 
-    public LocalDateTime getIsBannedUntill() {
-        return isBannedUntill;
+    public LocalDateTime getIsBannedUntil() {
+        return isBannedUntil;
     }
 
-    public void setIsBannedUntil(LocalDateTime isBannedUntill) {
-        this.isBannedUntill = isBannedUntill;
+    public void setIsBannedUntil(LocalDateTime isBannedUntil) {
+        this.isBannedUntil = isBannedUntil;
     }
 
     public static void setLogger(Logger logger) {

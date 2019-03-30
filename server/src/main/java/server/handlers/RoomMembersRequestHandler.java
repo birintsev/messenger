@@ -10,14 +10,12 @@ import static common.Utils.buildMessage;
 
 public class RoomMembersRequestHandler extends RequestHandler {
 
-    public RoomMembersRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public RoomMembersRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = getRoomMembers(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return getRoomMembers(clientListener, message);
     }
 
     /**
@@ -34,7 +32,7 @@ public class RoomMembersRequestHandler extends RequestHandler {
      *                  contains ids of the clients enumerated in the {@code text} field
      *                  of the message separated by comas.
      * */
-    private Message getRoomMembers(Message message) {
+    private Message getRoomMembers(ClientListener clientListener, Message message) {
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED).setText("Log in prior to request information");
         }

@@ -13,24 +13,20 @@ import javax.xml.bind.Marshaller;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.InvalidPropertiesFormatException;
 
 import static common.Utils.buildMessage;
 
 public class RegistrationRequestHandler extends RequestHandler {
-    public RegistrationRequestHandler(Message message) {
-        super(message);
-    }
 
-    public RegistrationRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public RegistrationRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        return registration(message);
+    public Message handle(ClientListener clientListener, Message message) {
+        return registration(clientListener, message);
     }
-    private Message registration(Message message) {
+
+    private Message registration(ClientListener clientListener, Message message) {
         if (message == null) {
             return new Message(MessageStatus.ERROR).setText("Message came as null");
         }
@@ -68,9 +64,9 @@ public class RegistrationRequestHandler extends RequestHandler {
             if (!clientListener.getServer().getOnlineClients().safe().containsKey(0)) {
                 RoomProcessing.loadRoom(clientListener.getServer(), 0);
             }
-            Room commomChat = clientListener.getServer().getOnlineRooms().safe().get(0);
-            commomChat.getMembers().safe().add(client.getClientId());
-            commomChat.save();
+            Room commonChat = clientListener.getServer().getOnlineRooms().safe().get(0);
+            commonChat.getMembers().safe().add(client.getClientId());
+            commonChat.save();
         } catch (NullPointerException e) {
             return new Message(MessageStatus.ERROR)
                     .setText("Check whether you have specified all the necessary parameters");

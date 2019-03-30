@@ -8,13 +8,13 @@ import server.client.ClientListener;
 import static common.Utils.buildMessage;
 
 public class StopServerRequestHandler extends RequestHandler {
-    public StopServerRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+
+    public StopServerRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = stopServer(message);
+    public Message handle(ClientListener clientListener, Message message) {
+        Message responseMessage = stopServer(clientListener, message);
         clientListener.sendMessageToConnectedClient(message);
         if (MessageStatus.ACCEPTED.equals(message.getStatus())) {
             clientListener.getServer().interrupt();
@@ -22,7 +22,7 @@ public class StopServerRequestHandler extends RequestHandler {
         return responseMessage;
     }
 
-    private Message stopServer(@NotNull Message message) {
+    private Message stopServer(ClientListener clientListener, @NotNull Message message) {
         if (!MessageStatus.STOP_SERVER.equals(message.getStatus())) {
             String errorMessage = buildMessage("Message of status", MessageStatus.STOP_SERVER
                     , "was expected, but found", message.getStatus());

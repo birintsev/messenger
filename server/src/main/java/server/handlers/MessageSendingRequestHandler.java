@@ -11,18 +11,13 @@ import java.io.IOException;
 import static common.Utils.buildMessage;
 
 public class MessageSendingRequestHandler extends RequestHandler {
-    public MessageSendingRequestHandler(Message message) {
-        super(message);
-    }
 
-    public MessageSendingRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public MessageSendingRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = sendMessage(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return sendMessage(clientListener, message);
     }
 
     /**
@@ -36,7 +31,7 @@ public class MessageSendingRequestHandler extends RequestHandler {
      *                  it may be of {@code MessageStatus.ERROR} either {@code MessageStatus.ACCEPTED}
      *                  or {@code MessageStatus.DENIED} status
      */
-    private Message sendMessage(Message message) {
+    private Message sendMessage(ClientListener clientListener, Message message) {
         if (message == null) {
             LOGGER.error("Message is null");
             return new Message(MessageStatus.ERROR).setText("Internal error. Message is null");

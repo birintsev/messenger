@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "message")
 public class Message {

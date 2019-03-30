@@ -44,7 +44,7 @@ public class ClientProcessing {
             JAXBContext jaxbContext = JAXBContext.newInstance(Message.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
             StringWriter stringWriter = new StringWriter();
-            Message banMessage = new Message(ban ? MessageStatus.CLIENTBAN : MessageStatus.CLIENTUNBAN)
+            Message banMessage = new Message(ban ? MessageStatus.CLIENT_BAN : MessageStatus.CLIENT_UNBAN)
                     .setToId(login.hashCode())
                     .setLogin(serverProperties.getProperty("serverLogin"))
                     .setPassword(serverProperties.getProperty("serverPassword"));
