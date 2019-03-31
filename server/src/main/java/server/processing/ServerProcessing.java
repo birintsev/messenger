@@ -39,15 +39,13 @@ public class ServerProcessing {
     public static void setLogger(Logger logger) {
         LOGGER = logger;
     }
-    /*
-    *   Detecting the current folder
-    * */
+
     static {
         try {
             currentFolder = new File(ServerProcessing.class.getProtectionDomain()
                     .getCodeSource().getLocation().toURI()).getParentFile();
             LoggersProcessing.setDefaultLoggersFiles();
-            PropertyConfigurator.configure(ServerProcessing.class.getResourceAsStream("/log4j.properties"/*"../../log4j.properties"*/));
+            PropertyConfigurator.configure(ServerProcessing.class.getResourceAsStream("/log4j.properties"));
             LOGGER = Logger.getLogger("ServerProcessing");
             PropertiesProcessing.setLogger(Logger.getLogger(PropertiesProcessing.class.getSimpleName()));
             if (LOGGER.isEnabledFor(Level.TRACE)) {
@@ -162,7 +160,7 @@ public class ServerProcessing {
         }
     }
 
-    private static void sendRestartMessage(Properties serverConfig) {
+    private static void sendRestartMessage(@NotNull Properties serverConfig) {
         try (Socket socket = new Socket("localhost", Integer.parseInt(serverConfig.getProperty("port")));
              DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
             Message message = new Message(MessageStatus.RESTART_SERVER)

@@ -96,7 +96,7 @@ public class RoomProcessing {
      *
      * @throws          InvalidPropertiesFormatException if {@code serverProperties} or the data it stores is not valid
      * */
-    public static Room createRoom(Server server, int adminId, int... clientsIds)
+    public static Room createRoom(@NotNull Server server, int adminId, int... clientsIds)
             throws InvalidPropertiesFormatException {
         if (!PropertiesProcessing.arePropertiesValid(server.getConfig())) {
             throw new InvalidPropertiesFormatException("The specified server configurations are not valid");
@@ -294,7 +294,7 @@ public class RoomProcessing {
      *  NOTE! If the room currently is in the {@code server} online rooms, its saving may cause errors related
      * to the absence of folders.
      * */
-    public static void permanentRemoveRoom(Server server, int roomId) {
+    public static void permanentRemoveRoom(@NotNull Server server, int roomId) {
         File roomFolder = new File(new File(server.getConfig().getProperty("roomsDir")), String.valueOf(roomId));
         if (roomFolder.isDirectory()) {
             clean(roomFolder);
