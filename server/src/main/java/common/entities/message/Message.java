@@ -17,9 +17,9 @@ public class Message {
     @XmlJavaTypeAdapter(value = Message.LocalDateTimeAdapter.class)
     private LocalDateTime creationDateTime;
     private MessageStatus status;
-    private String text;
-    private String login;
-    private String password;
+    private String text = "";
+    private String login = "";
+    private String password = "";
     private Integer fromId;
     private Integer toId;
     private Integer roomId;
