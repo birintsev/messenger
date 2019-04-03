@@ -41,12 +41,6 @@ public class AuthorizationRequestHandler extends RequestHandler {
         if (message == null) {
             return new Message(MessageStatus.ERROR).setText("Internal error");
         }
-        if (!MessageStatus.AUTH.equals(message.getStatus())) {
-            String errorMessage = buildMessage("Message of the", MessageStatus.AUTH, "was expected but found"
-                    , message.getStatus().toString());
-            LOGGER.warn(errorMessage);
-            return new Message(MessageStatus.ERROR).setText(errorMessage);
-        }
         if (message.getLogin() == null || message.getPassword() == null) {
             return new Message(MessageStatus.ERROR)
                     .setText((message.getLogin() == null ? "Login" : "Password").concat(" must be set"));

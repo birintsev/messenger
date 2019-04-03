@@ -23,12 +23,6 @@ public class StopServerRequestHandler extends RequestHandler {
     }
 
     private Message stopServer(ClientListener clientListener, @NotNull Message message) {
-        if (!MessageStatus.STOP_SERVER.equals(message.getStatus())) {
-            String errorMessage = buildMessage("Message of status", MessageStatus.STOP_SERVER
-                    , "was expected, but found", message.getStatus());
-            LOGGER.warn(errorMessage);
-            return new Message(MessageStatus.ERROR).setText("Internal error: ".concat(errorMessage));
-        }
         if ((!clientListener.getServer().getConfig().getProperty("serverLogin").equals(message.getLogin())
                 || !clientListener.getServer().getConfig().getProperty("serverPassword")
                 .equals(message.getPassword())) && !clientListener.getClient().isAdmin()) {

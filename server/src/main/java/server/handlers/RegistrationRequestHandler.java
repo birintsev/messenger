@@ -30,10 +30,6 @@ public class RegistrationRequestHandler extends RequestHandler {
         if (message == null) {
             return new Message(MessageStatus.ERROR).setText("Message came as null");
         }
-        if (!MessageStatus.REGISTRATION.equals(message.getStatus())) {
-            return new Message(MessageStatus.ERROR).setText(buildMessage("Message of the",
-                    MessageStatus.REGISTRATION, "was expected but found", message.getStatus()));
-        }
         File clientsDir = new File(clientListener.getServer().getConfig().getProperty("clientsDir"));
         String login = message.getLogin();
         String password = message.getPassword();

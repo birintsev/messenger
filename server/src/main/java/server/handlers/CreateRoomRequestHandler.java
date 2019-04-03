@@ -36,13 +36,6 @@ public class CreateRoomRequestHandler extends RequestHandler {
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED).setText("Please, log in first");
         }
-        if (!MessageStatus.CREATE_ROOM.equals(message.getStatus())) {
-            LOGGER.error(buildMessage("Unexpected message status. Expected"
-                    , MessageStatus.CREATE_ROOM, ". But found", message.getStatus()));
-            return new Message(MessageStatus.ERROR)
-                    .setText(buildMessage("The message status must be "
-                            , MessageStatus.CREATE_ROOM, " but found ", message.getStatus()));
-        }
         /*
          *   The field toId is considered as an id of the initial room member, thus it must be valid
          * i.e. the client with such id must exists

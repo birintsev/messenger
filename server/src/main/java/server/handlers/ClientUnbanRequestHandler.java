@@ -39,12 +39,6 @@ public class ClientUnbanRequestHandler extends RequestHandler {
      */
     private Message clientUnban(ClientListener clientListener, Message message) {
         String errorMessage;
-        if (message == null) {
-            if (LOGGER.isEnabledFor(Level.ERROR)) {
-                LOGGER.error("Passed null-message to perform client unbanning");
-            }
-            return new Message(MessageStatus.ERROR).setText("Error occurred while unbanning (null message)");
-        }
         if (message.getToId() == null) {
             errorMessage = "Attempt to unban unspecified account";
             if (LOGGER.isEnabledFor(Level.TRACE)) {
