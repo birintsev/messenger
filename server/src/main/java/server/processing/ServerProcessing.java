@@ -52,7 +52,9 @@ public class ServerProcessing {
                 LOGGER.trace(buildMessage("Current folder detected:", currentFolder.getAbsolutePath()));
             }
         } catch (URISyntaxException e) {
-            System.err.println(buildMessage(e.getClass().getName(), "occurred:", e.getMessage()));
+            if (LOGGER.isEnabledFor(Level.ERROR)) {
+                LOGGER.error(buildMessage(e.getClass().getName(), "occurred:", e.getMessage()));
+            }
             throw new RuntimeException(e.getLocalizedMessage());
         }
     }
@@ -72,7 +74,9 @@ public class ServerProcessing {
     public static void main(@SuppressWarnings("ParameterCanBeLocal") String[] args) throws IOException {
 
         File serverPropertiesFile;
-        System.out.println("Hello, please, enter one of the following commands:");
+        if (LOGGER.isEnabledFor(Level.INFO)) {
+            LOGGER.info("Hello, please, enter one of the following commands:");
+        }
         printCommands();
         args = new Scanner(System.in).nextLine().split(" ");
         InvocationMode invocationMode;
@@ -178,15 +182,16 @@ public class ServerProcessing {
     }
 
     private static void printCommands() {
-        System.out.println("                                    <---Available commands--->");
-        System.out.println("-cds path/to/server/root/folder                 - to create a default server root structure in the specified folder");
-        System.out.println("-start path/to/serverConfig.xml                 - to start the server denoted by the configurations");
-        System.out.println("-restart path/to/serverConfig.xml               - to restart the server denoted by the configurations");
-        System.out.println("-stop path/to/serverConfig.xml                  - to stop the server denoted by the configurations");
-        System.out.println("-ban path/to/serverConfig.xml <login> <hours>   - to ban the client on the server denoted by the configurations");
-        System.out.println("-unban path/to/serverConfig.xml <login>         - to unban the client on the server denoted by the configurations");
-        System.out.println("-exit                                           - to exit the program");
-
+        if(LOGGER.isEnabledFor(Level.INFO)) {
+            LOGGER.info("                                    <---Available commands--->");
+            LOGGER.info("-cds path/to/server/root/folder                 - to create a default server root structure in the specified folder");
+            LOGGER.info("-start path/to/serverConfig.xml                 - to start the server denoted by the configurations");
+            LOGGER.info("-restart path/to/serverConfig.xml               - to restart the server denoted by the configurations");
+            LOGGER.info("-stop path/to/serverConfig.xml                  - to stop the server denoted by the configurations");
+            LOGGER.info("-ban path/to/serverConfig.xml <login> <hours>   - to ban the client on the server denoted by the configurations");
+            LOGGER.info("-unban path/to/serverConfig.xml <login>         - to unban the client on the server denoted by the configurations");
+            LOGGER.info("-exit                                           - to exit the program");
+        }
     }
 
     /**
