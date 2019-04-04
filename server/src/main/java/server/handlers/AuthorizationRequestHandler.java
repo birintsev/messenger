@@ -1,5 +1,6 @@
 package server.handlers;
 
+import com.sun.deploy.util.StringUtils;
 import common.entities.message.Message;
 import common.entities.message.MessageStatus;
 import org.apache.log4j.Level;
@@ -38,10 +39,7 @@ public class AuthorizationRequestHandler extends RequestHandler {
      * @throws          NullPointerException     in case when message equals {@code null}
      */
     private Message auth(ClientListener clientListener, Message message) {
-        if (message == null) {
-            return new Message(MessageStatus.ERROR).setText("Internal error");
-        }
-        if (message.getLogin() == null || message.getPassword() == null) {
+        if (message.getLogin().isEmpty() || message.getPassword().isEmpty()) {
             return new Message(MessageStatus.ERROR)
                     .setText((message.getLogin() == null ? "Login" : "Password").concat(" must be set"));
         }

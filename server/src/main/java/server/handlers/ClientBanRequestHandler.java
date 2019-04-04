@@ -65,7 +65,7 @@ public class ClientBanRequestHandler extends RequestHandler {
             return new Message(MessageStatus.DENIED).setText(errorMessage);
         }
         int toId = message.getToId();
-        if (message.getText() == null) {
+        if (message.getText().isEmpty()) {
             errorMessage = "Attempt to ban client without specifying the term";
             LOGGER.trace(buildMessage(errorMessage, "from", message.getFromId(), "to", message.getToId()));
             return new Message(MessageStatus.ERROR).setText(errorMessage);

@@ -32,14 +32,10 @@ public class MessageSendingRequestHandler extends RequestHandler {
      *                  or {@code MessageStatus.DENIED} status
      */
     private Message sendMessage(ClientListener clientListener, Message message) {
-        if (message == null) {
-            LOGGER.error("Message is null");
-            return new Message(MessageStatus.ERROR).setText("Internal error. Message is null");
-        }
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED).setText("Please, log in first");
         }
-        if (message.getText() == null) {
+        if (message.getText().isEmpty()) {
             return new Message(MessageStatus.ERROR).setText("Message text has not been set");
         }
         if (message.getFromId() == null) {

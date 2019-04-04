@@ -48,9 +48,6 @@ public class MessageHistoryRequestHandler extends RequestHandler {
      *                                                                 while executing the operation
      */
     private synchronized Message getRoomMessages(ClientListener clientListener, Message message) {
-        if (message == null) {
-            return new Message(MessageStatus.ERROR).setText("Internal error occurred. Message is null");
-        }
         if (clientListener.isMessageNotFromThisLoggedClient(message)) {
             return new Message(MessageStatus.DENIED).setText("Log in first");
         }

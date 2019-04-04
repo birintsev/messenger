@@ -33,8 +33,8 @@ public class RegistrationRequestHandler extends RequestHandler {
         File clientsDir = new File(clientListener.getServer().getConfig().getProperty("clientsDir"));
         String login = message.getLogin();
         String password = message.getPassword();
-        if (login == null || password == null) {
-            return new Message(MessageStatus.ERROR).setText((login == null ? "login" : "password")
+        if (login.isEmpty() || password.isEmpty()) {
+            return new Message(MessageStatus.ERROR).setText((login.isEmpty() ? "login" : "password")
                     .concat(" has not been set"));
         }
         File clientDir = new File(clientsDir, String.valueOf(login.hashCode()));
