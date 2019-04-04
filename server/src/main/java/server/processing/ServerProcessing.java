@@ -39,15 +39,13 @@ public class ServerProcessing {
     public static void setLogger(Logger logger) {
         LOGGER = logger;
     }
-    /*
-    *   Detecting the current folder
-    * */
+
     static {
         try {
             currentFolder = new File(ServerProcessing.class.getProtectionDomain()
                     .getCodeSource().getLocation().toURI()).getParentFile();
             LoggersProcessing.setDefaultLoggersFiles();
-            PropertyConfigurator.configure(ServerProcessing.class.getResourceAsStream("../../log4j.properties"));
+            PropertyConfigurator.configure(ServerProcessing.class.getResourceAsStream("/log4j.properties"));
             LOGGER = Logger.getLogger("ServerProcessing");
             PropertiesProcessing.setLogger(Logger.getLogger(PropertiesProcessing.class.getSimpleName()));
             if (LOGGER.isEnabledFor(Level.TRACE)) {
@@ -73,7 +71,7 @@ public class ServerProcessing {
      * */
     public static void main(@SuppressWarnings("ParameterCanBeLocal") String[] args) throws IOException {
 
-        File serverProperiesFile;
+        File serverPropertiesFile;
         System.out.println("Hello, please, enter one of the following commands:");
         printCommands();
         args = new Scanner(System.in).nextLine().split(" ");
@@ -85,18 +83,18 @@ public class ServerProcessing {
             return;
         }
         try {
-            serverProperiesFile = new File(args[1]);
+            serverPropertiesFile = new File(args[1]);
         } catch (ArrayIndexOutOfBoundsException e) {
-            serverProperiesFile = new File(currentFolder, "serverConfig.xml");
+            serverPropertiesFile = new File(currentFolder, "serverConfig.xml");
         }
         if (LOGGER.isEnabledFor(Level.TRACE)) {
-            LOGGER.trace(buildMessage("Current serverConfig.xml is:", serverProperiesFile.getAbsolutePath()));
+            LOGGER.trace(buildMessage("Current serverConfig.xml is:", serverPropertiesFile.getAbsolutePath()));
         }
         Properties serverProperties;
         switch (invocationMode) {
             case START:
                 try {
-                    serverProperties = PropertiesProcessing.loadPropertiesFromFile(serverProperiesFile);
+                    serverProperties = PropertiesProcessing.loadPropertiesFromFile(serverPropertiesFile);
                     startServer(serverProperties);
                 } catch (IOException e) {
                     if (LOGGER.isEnabledFor(Level.ERROR)) {
@@ -107,7 +105,7 @@ public class ServerProcessing {
                 break;
             case STOP:
                 try {
-                    sendStopServerMessage(serverProperiesFile);
+                    sendStopServerMessage(serverPropertiesFile);
                 } catch (Exception e) {
                     if (LOGGER.isEnabledFor(Level.ERROR)) {
                         LOGGER.error(e.getLocalizedMessage());
@@ -115,7 +113,7 @@ public class ServerProcessing {
                 }
                 break;
             case RESTART:
-                serverProperties = PropertiesProcessing.loadPropertiesFromFile(serverProperiesFile);
+                serverProperties = PropertiesProcessing.loadPropertiesFromFile(serverPropertiesFile);
                 sendRestartMessage(serverProperties);
                 break;
             case CREATE_DEFAULT_SERVER:
@@ -134,7 +132,7 @@ public class ServerProcessing {
             case BAN:
                 try {
                     serverProperties = new Properties();
-                    serverProperties.loadFromXML(new FileInputStream(serverProperiesFile));
+                    serverProperties.loadFromXML(new FileInputStream(serverPropertiesFile));
                     ClientProcessing.clientBan(serverProperties, args[2], true, Integer.parseInt(args[3]));
                 } catch (IndexOutOfBoundsException e) {
                     LOGGER.info("Not all arguments are specified. Please, check the input");
@@ -146,7 +144,7 @@ public class ServerProcessing {
             case UNBAN:
                 try {
                     serverProperties = new Properties();
-                    serverProperties.loadFromXML(new FileInputStream(serverProperiesFile));
+                    serverProperties.loadFromXML(new FileInputStream(serverPropertiesFile));
                     ClientProcessing.clientBan(serverProperties, args[2], false, 0);
                 } catch (IndexOutOfBoundsException e) {
                     LOGGER.error("Not all arguments are specified. Please, check the input");
@@ -162,7 +160,7 @@ public class ServerProcessing {
         }
     }
 
-    private static void sendRestartMessage(Properties serverConfig) {
+    private static void sendRestartMessage(@NotNull Properties serverConfig) {
         try (Socket socket = new Socket("localhost", Integer.parseInt(serverConfig.getProperty("port")));
              DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
             Message message = new Message(MessageStatus.RESTART_SERVER)

@@ -5,7 +5,7 @@ import common.entities.message.MessageStatus;
 import server.client.Client;
 import server.client.ClientListener;
 import server.room.Room;
-import server.room.RoomProcessing;
+import server.processing.RoomProcessing;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -13,36 +13,28 @@ import javax.xml.bind.Marshaller;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.InvalidPropertiesFormatException;
 
 import static common.Utils.buildMessage;
 
 public class RegistrationRequestHandler extends RequestHandler {
-    public RegistrationRequestHandler(Message message) {
-        super(message);
-    }
 
-    public RegistrationRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public RegistrationRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        return registration(message);
+    public Message handle(ClientListener clientListener, Message message) {
+        return registration(clientListener, message);
     }
-    private Message registration(Message message) {
+
+    private Message registration(ClientListener clientListener, Message message) {
         if (message == null) {
             return new Message(MessageStatus.ERROR).setText("Message came as null");
-        }
-        if (!MessageStatus.REGISTRATION.equals(message.getStatus())) {
-            return new Message(MessageStatus.ERROR).setText(buildMessage("Message of the",
-                    MessageStatus.REGISTRATION, "was expected but found", message.getStatus()));
         }
         File clientsDir = new File(clientListener.getServer().getConfig().getProperty("clientsDir"));
         String login = message.getLogin();
         String password = message.getPassword();
-        if (login == null || password == null) {
-            return new Message(MessageStatus.ERROR).setText((login == null ? "login" : "password")
+        if (login.isEmpty() || password.isEmpty()) {
+            return new Message(MessageStatus.ERROR).setText((login.isEmpty() ? "login" : "password")
                     .concat(" has not been set"));
         }
         File clientDir = new File(clientsDir, String.valueOf(login.hashCode()));
@@ -68,23 +60,15 @@ public class RegistrationRequestHandler extends RequestHandler {
             if (!clientListener.getServer().getOnlineClients().safe().containsKey(0)) {
                 RoomProcessing.loadRoom(clientListener.getServer(), 0);
             }
-            Room commomChat = clientListener.getServer().getOnlineRooms().safe().get(0);
-            commomChat.getMembers().safe().add(client.getClientId());
-            commomChat.save();
+            Room commonChat = clientListener.getServer().getOnlineRooms().safe().get(0);
+            commonChat.getMembers().safe().add(client.getClientId());
+            commonChat.save();
         } catch (NullPointerException e) {
             return new Message(MessageStatus.ERROR)
                     .setText("Check whether you have specified all the necessary parameters");
-        } catch (InvalidPropertiesFormatException e) {
-            LOGGER.error("Wrong properties");
-            throw new RuntimeException(e);
         }
         if (!clientListener.getServer().getOnlineRooms().safe().containsKey(0)) {
-            try {
-                RoomProcessing.loadRoom(clientListener.getServer(), 0);
-            } catch (InvalidPropertiesFormatException e) {
-                LOGGER.error(buildMessage("Unknown server configuration error occurred", e.getMessage()));
-                throw new RuntimeException(e);
-            }
+            RoomProcessing.loadRoom(clientListener.getServer(), 0);
         }
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Client.class);

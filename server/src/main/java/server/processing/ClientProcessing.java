@@ -3,6 +3,7 @@ package server.processing;
 import common.entities.message.Message;
 import common.entities.message.MessageStatus;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import server.client.Client;
 import server.exceptions.ClientNotFoundException;
 
@@ -44,7 +45,7 @@ public class ClientProcessing {
             JAXBContext jaxbContext = JAXBContext.newInstance(Message.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
             StringWriter stringWriter = new StringWriter();
-            Message banMessage = new Message(ban ? MessageStatus.CLIENTBAN : MessageStatus.CLIENTUNBAN)
+            Message banMessage = new Message(ban ? MessageStatus.CLIENT_BAN : MessageStatus.CLIENT_UNBAN)
                     .setToId(login.hashCode())
                     .setLogin(serverProperties.getProperty("serverLogin"))
                     .setPassword(serverProperties.getProperty("serverPassword"));
@@ -128,7 +129,7 @@ public class ClientProcessing {
         }
     }
 
-    private static File getClientFile(Properties serverConfig, int clientId) {
+    private static File getClientFile(@NotNull Properties serverConfig, int clientId) {
         File clientsFolder = new File(serverConfig.getProperty("clientsDir"));
         File clientFolder = new File(clientsFolder, String.valueOf(clientId));
         return new File(clientFolder, clientFolder.getName().concat(".xml"));

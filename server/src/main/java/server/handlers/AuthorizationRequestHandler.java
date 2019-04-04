@@ -17,42 +17,28 @@ import java.time.LocalDateTime;
 import static common.Utils.buildMessage;
 
 public class AuthorizationRequestHandler extends RequestHandler {
-    public AuthorizationRequestHandler(Message message) {
-        super(message);
-    }
-
-    public AuthorizationRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+    public AuthorizationRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = auth(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return auth(clientListener, message);
     }
 
     /**
-     * The method that turns an incoming connection to a client's session
+     *  The method that turns an incoming connection to a client's session
      * Verifies the {@code message} of status {@code MessageStatus.AUTH} comparing the incoming user data
      * such as a login and a password.
      *
-     * @param message a message of {@code MessageStatus.AUTH} containing a login and a password
+     * @param           message a message of {@code MessageStatus.AUTH} containing a login and a password
      *
-     * @throws ClientNotFoundException  if the specified client's file has not been found
-     *                                  in the {@code clientsDir} folder or there is not user data file
-     * @throws NullPointerException     in case when message equals {@code null}
+     * @throws          ClientNotFoundException  if the specified client's file has not been found
+     *                  in the {@code clientsDir} folder or there is not user data file
+     *
+     * @throws          NullPointerException     in case when message equals {@code null}
      */
-    private Message auth(Message message) {
-        if (message == null) {
-            return new Message(MessageStatus.ERROR).setText("Internal error");
-        }
-        if (!MessageStatus.AUTH.equals(message.getStatus())) {
-            String errorMessage = buildMessage("Message of the", MessageStatus.AUTH, "was expected but found"
-                    , message.getStatus().toString());
-            LOGGER.warn(errorMessage);
-            return new Message(MessageStatus.ERROR).setText(errorMessage);
-        }
-        if (message.getLogin() == null || message.getPassword() == null) {
+    private Message auth(ClientListener clientListener, Message message) {
+        if (message.getLogin().isEmpty() || message.getPassword().isEmpty()) {
             return new Message(MessageStatus.ERROR)
                     .setText((message.getLogin() == null ? "Login" : "Password").concat(" must be set"));
         }
@@ -70,9 +56,9 @@ public class AuthorizationRequestHandler extends RequestHandler {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             Client client = (Client) unmarshaller.unmarshal(clientFile);
             if (client.isBaned()) {
-                if (LocalDateTime.now().isBefore(client.getIsBannedUntill())) {
+                if (LocalDateTime.now().isBefore(client.getIsBannedUntil())) {
                     return new Message(MessageStatus.DENIED).setText(buildMessage("You are banned until"
-                            , ServerProcessing.DATE_TIME_FORMATTER.format(client.getIsBannedUntill())));
+                            , ServerProcessing.DATE_TIME_FORMATTER.format(client.getIsBannedUntil())));
                 } else {
                     client.setBaned(false);
                     client.setIsBannedUntil(null);
@@ -86,6 +72,8 @@ public class AuthorizationRequestHandler extends RequestHandler {
                 clientListener.setClient(client);
                 clientListener.getClient().setServer(clientListener.getServer());
                 LOGGER.trace(buildMessage("Client (id", client.getClientId(), ") has logged in"));
+                clientListener.getServer().getOnlineClients().safe()
+                        .put(clientListener.getClient().getClientId(), clientListener);
                 return new Message(MessageStatus.ACCEPTED);
             } else {
                 if (LOGGER.isEnabledFor(Level.TRACE)) {

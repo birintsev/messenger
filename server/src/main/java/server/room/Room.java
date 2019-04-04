@@ -83,6 +83,10 @@ public class Room implements Saveable {
         });
     }
 
+    public int getAdminId() {
+        return adminId;
+    }
+
     public void setRoomId(int roomId) {
         this.roomId = roomId;
     }

@@ -1,13 +1,13 @@
-package server.room;
+package server.processing;
 
 import common.entities.message.Message;
 import common.entities.message.MessageStatus;
+import org.apache.log4j.Level;
 import org.xml.sax.InputSource;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.NodeList;
 import server.Server;
-import server.processing.ClientProcessing;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,7 +18,7 @@ import java.util.*;
 
 import server.exceptions.ClientNotFoundException;
 import server.exceptions.RoomNotFoundException;
-import server.processing.PropertiesProcessing;
+import server.room.Room;
 
 import static common.Utils.buildMessage;
 
@@ -43,20 +43,12 @@ public class RoomProcessing {
      * @param           roomId is an id of the room to be searched
      * @param           server a server containing {@code room}
      *
-     * @throws          InvalidPropertiesFormatException if {@code serverConfig} is not valid e.g. is {@code null}
-     *                  or the specified in the {@code serverConfig} filepath does not points an existing file
-     *
-     * @exception       RoomNotFoundException in case if there is not such room on the server
-     *
      * @return          an instance of {@code Room} that has {@code roomId} equal to the specified by parameter
      * */
-    public static Room loadRoom(Server server, int roomId) throws InvalidPropertiesFormatException {
+    public static Room loadRoom(Server server, int roomId) {
         if (server == null) {
             LOGGER.error("Passed null server value");
             throw new NullPointerException("Server must not be null");
-        }
-        if (!PropertiesProcessing.arePropertiesValid(server.getConfig())) {
-            throw new InvalidPropertiesFormatException("Server configurations are not valid");
         }
         File roomsDir = new File(server.getConfig().getProperty("roomsDir"));
         File roomDir = new File(roomsDir, String.valueOf(roomId));
@@ -104,7 +96,7 @@ public class RoomProcessing {
      *
      * @throws          InvalidPropertiesFormatException if {@code serverProperties} or the data it stores is not valid
      * */
-    public static Room createRoom(Server server, int adminId, int... clientsIds)
+    public static Room createRoom(@NotNull Server server, int adminId, int... clientsIds)
             throws InvalidPropertiesFormatException {
         if (!PropertiesProcessing.arePropertiesValid(server.getConfig())) {
             throw new InvalidPropertiesFormatException("The specified server configurations are not valid");
@@ -266,7 +258,7 @@ public class RoomProcessing {
     public static boolean isMember(@NotNull Properties serverProperties, int clientId, int roomId) {
         if (!PropertiesProcessing.arePropertiesValid(serverProperties)
                 || RoomProcessing.hasRoomBeenCreated(serverProperties, roomId) == 0L
-                || !ClientProcessing.hasNotAccountBeenRegistered(serverProperties,clientId)) {
+                || ClientProcessing.hasNotAccountBeenRegistered(serverProperties,clientId)) {
             return false;
         }
         XPath xPath = XPathFactory.newInstance().newXPath();
@@ -293,5 +285,76 @@ public class RoomProcessing {
             return false; // return false OR throw new RuntimeException(e); ?
         }
         return false;
+    }
+
+    /**
+     *  The method {@code permanentRemoveRoom} completely removes the room specified by the {@code roomId}
+     * from the disk. The files stored in the room root folder also will be removed.
+     *
+     *  NOTE! If the room currently is in the {@code server} online rooms, its saving may cause errors related
+     * to the absence of folders.
+     * */
+    public static void permanentRemoveRoom(@NotNull Server server, int roomId) {
+        File roomFolder = new File(new File(server.getConfig().getProperty("roomsDir")), String.valueOf(roomId));
+        if (roomFolder.isDirectory()) {
+            clean(roomFolder);
+        }
+    }
+
+    /**
+     *  This method provides an ability to delete the whole file or folder with all the children
+     *
+     * @param           file an abstract pathname to the file to be deleted
+     * */
+    @SuppressWarnings("Duplicates")
+    private static void clean(File file) {
+        if (file == null) {
+            if (LOGGER.isEnabledFor(Level.DEBUG)) {
+                LOGGER.debug("null file passed as an abstract filepath for removing");
+            }
+            return;
+        }
+        if (file.isFile()) {
+            if (file.delete()) {
+                if (LOGGER.isEnabledFor(Level.TRACE)) {
+                    LOGGER.trace(buildMessage(file.getAbsolutePath(), "has been successfully deleted"));
+                }
+            } else {
+                if (LOGGER.isEnabledFor(Level.WARN)) {
+                    LOGGER.warn(buildMessage(file.getAbsolutePath(), "has not been deleted"));
+                }
+            }
+            return;
+        }
+        if (file.isDirectory()) {
+            Set<File> children;
+            @SuppressWarnings("SpellCheckingInspection") File [] chldrn = file.listFiles();
+            if (chldrn == null) {
+                return;
+            }
+            children = new HashSet<>(Arrays.asList(chldrn));
+            for (File child : children) {
+                if (child.delete()) {
+                    if (LOGGER.isEnabledFor(Level.TRACE)) {
+                        LOGGER.trace(buildMessage(child.getAbsolutePath(), "has been successfully deleted"));
+                    }
+                } else {
+                    if (LOGGER.isEnabledFor(Level.WARN)) {
+                        LOGGER.warn(buildMessage(child.getAbsolutePath(), "has not been deleted"));
+                    }
+                }
+            }
+        }
+        if (file.exists()) {
+            if (file.delete()) {
+                if (LOGGER.isEnabledFor(Level.TRACE)) {
+                    LOGGER.trace(buildMessage(file.getAbsolutePath(), "has been successfully deleted"));
+                }
+            } else {
+                if (LOGGER.isEnabledFor(Level.WARN)) {
+                    LOGGER.warn(buildMessage(file.getAbsolutePath(), "has not been deleted"));
+                }
+            }
+        }
     }
 }

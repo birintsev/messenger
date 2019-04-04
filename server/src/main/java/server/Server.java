@@ -10,7 +10,7 @@ import server.client.ClientListener;
 import server.processing.LoggersProcessing;
 import server.processing.PropertiesProcessing;
 import server.room.Room;
-import server.room.RoomProcessing;
+import server.processing.RoomProcessing;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -226,15 +226,13 @@ public class Server extends Thread implements Saveable {
                     try {
                         sleep(1000);
                     } catch (InterruptedException e) {
-                        if (LOGGER.isEnabledFor(Level.ERROR)) {
-                            LOGGER.error(
-                                    buildMessage(e.getClass().getName(), "occurred:", e.getLocalizedMessage()));
+                        if (LOGGER.isEnabledFor(Level.DEBUG)) {
+                            LOGGER.debug(
+                                    buildMessage(e.getClass().getName()
+                                            , "occurred:"
+                                            , e.getLocalizedMessage()));
                         }
                     }
-                }
-                if (!clientListenerEntry.getValue().isInterrupted()) {
-                    LOGGER.error(buildMessage("Failed to interrupt client's (id"
-                            , clientListenerEntry.getValue().getClient().getClientId(), ") thread"));
                 }
             }
         }

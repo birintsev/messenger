@@ -4,6 +4,7 @@ import common.entities.Shell;
 import common.entities.message.Message;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import server.Server;
 
 import javax.xml.bind.JAXBContext;
@@ -38,7 +39,7 @@ public class ClientListener extends Thread {
     private Client client;
     private RequestHandler requestHandler;
 
-    Shell<DataOutputStream> getOut() {
+    public Shell<DataOutputStream> getOut() {
         return out;
     }
 
@@ -52,7 +53,7 @@ public class ClientListener extends Thread {
 
     private static volatile Logger LOGGER = Logger.getLogger(ClientListener.class.getSimpleName());
 
-    public ClientListener(Server server, Socket socket) throws IOException {
+    public ClientListener(Server server, @NotNull Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
         requestHandler = new RequestHandler(this);

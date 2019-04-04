@@ -7,7 +7,6 @@ import server.Server;
 import server.client.Client;
 import server.client.ClientListener;
 import server.room.Room;
-import server.room.RoomProcessing;
 
 import java.io.File;
 import java.util.InvalidPropertiesFormatException;
@@ -18,7 +17,7 @@ import static server.processing.PropertiesProcessing.arePropertiesValid;
 
 public class LoggersProcessing {
     public static void resetLoggers() {
-        PropertyConfigurator.configure(LoggersProcessing.class.getResourceAsStream("../../log4j.properties"));
+        PropertyConfigurator.configure(LoggersProcessing.class.getResourceAsStream("/log4j.properties"));
         Client.setLogger(Logger.getLogger(Client.class.getSimpleName()));
         ClientListener.setLogger(Logger.getLogger(ClientListener.class.getSimpleName()));
         Server.setLogger(Logger.getLogger(Server.class.getSimpleName()));

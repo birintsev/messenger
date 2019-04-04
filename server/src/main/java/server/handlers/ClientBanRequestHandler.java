@@ -16,18 +16,17 @@ import static common.Utils.buildMessage;
 import static server.processing.ClientProcessing.loadClient;
 
 public class ClientBanRequestHandler extends RequestHandler {
-    public ClientBanRequestHandler(ClientListener clientListener, Message message) {
-        super(clientListener, message);
+
+    public ClientBanRequestHandler() {
     }
 
     @Override
-    public Message handle() {
-        Message responseMessage = clientBan(message);
-        return responseMessage;
+    public Message handle(ClientListener clientListener, Message message) {
+        return clientBan(clientListener, message);
     }
 
     /**
-     * The method {@code clientBan} handles with requests of blocking a user.
+     *  The method {@code clientBan} handles with requests of blocking a user.
      *
      * @param           message an instance of {@code Message} that represents a request about blocking a user.
      *                          NOTE! It is expected that message contains following non-null fields
@@ -48,7 +47,7 @@ public class ClientBanRequestHandler extends RequestHandler {
      *                                                          does not have admin rights
      *                      {@code MessageStatus.ERROR}     -   if an error occurred while executing the operation
      */
-    private Message clientBan(@NotNull Message message) {
+    private Message clientBan(ClientListener clientListener, @NotNull Message message) {
         String errorMessage;
         if (message.getToId() == null) {
             errorMessage = buildMessage("Attempt to ban unspecified account from "
@@ -66,7 +65,7 @@ public class ClientBanRequestHandler extends RequestHandler {
             return new Message(MessageStatus.DENIED).setText(errorMessage);
         }
         int toId = message.getToId();
-        if (message.getText() == null) {
+        if (message.getText().isEmpty()) {
             errorMessage = "Attempt to ban client without specifying the term";
             LOGGER.trace(buildMessage(errorMessage, "from", message.getFromId(), "to", message.getToId()));
             return new Message(MessageStatus.ERROR).setText(errorMessage);

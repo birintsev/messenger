@@ -1,5 +1,7 @@
 package common;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  *  The class {@code Utils} contains mostly static methods are commonly used for supporting operations
  * like message building.
@@ -16,7 +18,7 @@ public class Utils {
      *
      * @return          a {@code String} composed of passed {@code elements}
      * */
-    public static String buildMessage(Object...elements) {
+    public static String buildMessage(@NotNull Object...elements) {
         StringBuilder messageBuilder = new StringBuilder();
         for (Object element : elements) {
             messageBuilder.append(element).append(' ');
