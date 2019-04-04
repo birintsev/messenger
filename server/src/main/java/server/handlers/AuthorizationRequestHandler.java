@@ -1,6 +1,5 @@
 package server.handlers;
 
-import com.sun.deploy.util.StringUtils;
 import common.entities.message.Message;
 import common.entities.message.MessageStatus;
 import org.apache.log4j.Level;
