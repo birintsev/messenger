@@ -137,14 +137,10 @@ public class Server extends Thread implements Saveable {
         try {
             serverSocket = new ServerSocket(Integer.parseInt(config.getProperty("port")));
             while (!isInterrupted() && !serverSocket.isClosed()) {
-                try {
-                    socket = serverSocket.accept();
-                    LOGGER.info(buildMessage("Incoming connection from:", socket.getInetAddress()));
-                    ClientListener clientListener = new ClientListener(this, socket);
-                    clientListener.start();
-                } catch (IOException e) {
-                    LOGGER.error(buildMessage(e.getClass().getName(), "occurred:", e.getLocalizedMessage()));
-                }
+                socket = serverSocket.accept();
+                LOGGER.info(buildMessage("Incoming connection from:", socket.getInetAddress()));
+                ClientListener clientListener = new ClientListener(this, socket);
+                clientListener.start();
             }
         } catch (IOException e) {
             LOGGER.fatal(buildMessage(e.getClass().getName(), "occurred:", e.getLocalizedMessage()));
